@@ -1,0 +1,44 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Bienvenue sur notre E-commerce{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <div class="jumbotron">
+        <h1 class="display-4">Bienvenue sur notre E-commerce</h1>
+        <p class="lead">Découvrez notre sélection de produits de qualité.</p>
+    </div>
+
+    <h2 class="mt-4">Nos catégories</h2>
+    <div class="row">
+        {% for category in categories %}
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ category.name }}</h5>
+                        <p class="card-text">{{ category.description }}</p>
+                        <a href="{{ path('app_category_show', {'id': category.id}) }}" class="btn btn-primary">Voir les produits</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <h2 class="mt-4">Nos produits en vedette</h2>
+    <div class="row">
+        {% for product in products %}
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ product.name }}</h5>
+                        <p class="card-text">{{ product.description }}</p>
+                        <p class="card-text"><strong>Prix :</strong> {{ product.price }} TND</p>
+                        <p class="card-text"><strong>Stock :</strong> {{ product.stock }}</p>
+                        <a href="{{ path('app_product_show', {'id': product.id}) }}" class="btn btn-primary">Voir le produit</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %} 

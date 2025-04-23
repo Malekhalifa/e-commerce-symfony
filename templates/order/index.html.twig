@@ -1,0 +1,67 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des commandes{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        <h1>Liste des commandes</h1>
+
+        <a href="{{ path('app_order_new') }}" class="btn btn-primary mb-3">Créer une nouvelle commande</a>
+
+        {% for message in app.flashes('success') %}
+            <div class="alert alert-success">
+                {{ message }}
+            </div>
+        {% endfor %}
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Client</th>
+                    <th>Date</th>
+                    <th>Statut</th>
+                    <th>Produits</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for order in orders %}
+                <tr>
+                    <td>{{ order.id }}</td>
+                    <td>{{ order.user.email }}</td>
+                    <td>{{ order.date|date('d/m/Y H:i') }}</td>
+                    <td>
+                        {% if order.status == 'Commande passée' %}
+                            <span class="badge bg-warning">{{ order.status }}</span>
+                        {% elseif order.status == 'Commande confirmée' %}
+                            <span class="badge bg-info">{{ order.status }}</span>
+                        {% else %}
+                            <span class="badge bg-success">{{ order.status }}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <ul class="list-unstyled">
+                            {% for product in order.products %}
+                                <li>{{ product.name }} - {{ product.price }} TND</li>
+                            {% endfor %}
+                        </ul>
+                    </td>
+                    <td>
+                        <a href="{{ path('app_order_show', {'id': order.id}) }}" class="btn btn-info btn-sm">Voir</a>
+                        <a href="{{ path('app_order_edit', {'id': order.id}) }}" class="btn btn-warning btn-sm">Modifier</a>
+                        <form method="post" action="{{ path('app_order_delete', {'id': order.id}) }}" style="display: inline-block" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette commande ?');">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ order.id) }}">
+                            <button class="btn btn-danger btn-sm">Supprimer</button>
+                        </form>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="6">Aucune commande trouvée</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %} 

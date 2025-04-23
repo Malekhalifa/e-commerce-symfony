@@ -1,0 +1,68 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon Panier{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success">
+            {{ message }}
+        </div>
+    {% endfor %}
+    
+    {% for message in app.flashes('warning') %}
+        <div class="alert alert-warning">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    <div class="row mb-4">
+        <div class="col">
+            <h1>Mon Panier</h1>
+        </div>
+        {% if app.user and products is not empty %}
+            <div class="col text-end">
+                <a href="{{ path('app_cart_validate') }}" class="btn btn-success">
+                    <i class="fas fa-shopping-cart"></i> Valider ma commande
+                </a>
+                <a href="{{ path('app_cart_clear') }}" class="btn btn-danger">
+                    <i class="fas fa-trash"></i> Vider le panier
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+    {% if products is empty %}
+        <div class="alert alert-info">
+            Votre panier est vide. <a href="{{ path('app_product_index') }}">Continuer vos achats</a>
+        </div>
+    {% else %}
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Produit</th>
+                        <th>Prix unitaire</th>
+                        <th>Quantité</th>
+                        <th>Sous-total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in products %}
+                        <tr>
+                            <td>{{ item.product.name }}</td>
+                            <td>{{ item.product.price }} TND</td>
+                            <td>{{ item.quantity }}</td>
+                            <td>{{ item.subtotal }} TND</td>
+                        </tr>
+                    {% endfor %}
+                    <tr class="table-primary">
+                        <td colspan="3" class="text-end"><strong>Total</strong></td>
+                        <td><strong>{{ total }} TND</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+</div>
+{% endblock %} 

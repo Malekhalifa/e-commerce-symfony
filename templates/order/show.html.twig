@@ -1,0 +1,64 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Commande {{ order.id }}{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        <h1>Commande #{{ order.id }}</h1>
+
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Détails de la commande</h5>
+                <p class="card-text"><strong>Date :</strong> {{ order.date|date('d/m/Y H:i') }}</p>
+                <p class="card-text"><strong>Statut :</strong> 
+                    {% if order.status == 'Commande passée' %}
+                        <span class="badge bg-warning">{{ order.status }}</span>
+                    {% elseif order.status == 'Commande confirmée' %}
+                        <span class="badge bg-info">{{ order.status }}</span>
+                    {% else %}
+                        <span class="badge bg-success">{{ order.status }}</span>
+                    {% endif %}
+                </p>
+                <p class="card-text"><strong>Client :</strong> {{ order.user.email }}</p>
+                
+                <h6 class="mt-4">Produits commandés :</h6>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Produit</th>
+                            <th>Prix</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in order.products %}
+                            <tr>
+                                <td>{{ product.name }}</td>
+                                <td>{{ product.price }} TND</td>
+                            </tr>
+                        {% endfor %}
+                        <tr class="table-primary">
+                            <td><strong>Total</strong></td>
+                            <td><strong>{{ order.products|reduce((carry, product) => carry + product.price, 0) }} TND</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="mt-3">
+            {% if is_granted('ROLE_ADMIN') %}
+                <a href="{{ path('app_order_edit', {'id': order.id}) }}" class="btn btn-warning">Modifier</a>
+                <form method="post" action="{{ path('app_order_delete', {'id': order.id}) }}" style="display: inline-block" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette commande ?');">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ order.id) }}">
+                    <button class="btn btn-danger">Supprimer</button>
+                </form>
+            {% endif %}
+            
+            {% if is_granted('ROLE_ADMIN') %}
+                <a href="{{ path('app_order_index') }}" class="btn btn-secondary">Retour à la liste</a>
+            {% else %}
+                <a href="{{ path('app_user_orders') }}" class="btn btn-secondary">Retour à mes commandes</a>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %} 
