@@ -6,23 +6,37 @@
     <div class="container mt-4">
         <h1>Produit : {{ product.name }}</h1>
 
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">Détails du produit</h5>
-                <p class="card-text"><strong>Prix :</strong> {{ product.price }} TND</p>
-                <p class="card-text"><strong>Stock :</strong> {{ product.stock }}</p>
-                <p class="card-text"><strong>Description :</strong> {{ product.description }}</p>
-                <p class="card-text"><strong>Catégorie :</strong> {{ product.category.name }}</p>
-                
-                {% if app.user %}
-                    <a href="{{ path('app_cart_add', {'id': product.id}) }}" class="btn btn-primary">
-                        <i class="fas fa-cart-plus"></i> Ajouter au panier
-                    </a>
-                {% else %}
-                    <a href="{{ path('app_login') }}" class="btn btn-secondary">
-                        Connectez-vous pour commander
-                    </a>
-                {% endif %}
+        <div class="row">
+            <div class="col-md-6">
+                <img src="{{ product.image }}" class="img-fluid rounded" alt="{{ product.name }}" style="width: 100%; height: 400px; object-fit: cover;">
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Détails du produit</h5>
+                        <p class="card-text"><strong>Prix :</strong> {{ product.price }} TND</p>
+                        {% if is_granted('ROLE_ADMIN') %}
+                            <p class="card-text"><strong>Stock :</strong> {{ product.stock }}</p>
+                        {% endif %}
+                        <p class="card-text"><strong>Description :</strong> {{ product.description }}</p>
+                        <p class="card-text"><strong>Catégorie :</strong> {{ product.category.name }}</p>
+                        
+                        {% if app.user %}
+                            <form method="post" action="{{ path('app_cart_add', {'id': product.id}) }}" class="d-inline">
+                                <div class="input-group" style="width: 200px;">
+                                    <input type="number" name="quantity" class="form-control" value="1" min="1" max="{% if is_granted('ROLE_ADMIN') %}{{ product.stock }}{% else %}10{% endif %}">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-cart-plus"></i> Ajouter au panier
+                                    </button>
+                                </div>
+                            </form>
+                        {% else %}
+                            <a href="{{ path('app_login') }}" class="btn btn-secondary">
+                                Connectez-vous pour commander
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
         </div>
 

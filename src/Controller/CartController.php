@@ -8,6 +8,7 @@ use App\Repository\ProductRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
@@ -40,18 +41,31 @@ class CartController extends AbstractController
         ]);
     }
 
-    #[Route('/add/{id}', name: 'app_cart_add', methods: ['GET'])]
+    #[Route('/add/{id}', name: 'app_cart_add', methods: ['POST'])]
     #[IsGranted('ROLE_USER')]
-    public function addToCart(Product $product, SessionInterface $session): Response
+    public function addToCart(Product $product, Request $request, SessionInterface $session): Response
     {
         // Get the cart from the session
         $cart = $session->get('cart', []);
 
+        // Get quantity from request
+        $quantity = (int) $request->request->get('quantity', 1);
+
+        // Validate quantity
+        if ($quantity < 1) {
+            $quantity = 1;
+        }
+
+        // Check stock if user is admin
+        if ($this->isGranted('ROLE_ADMIN') && $quantity > $product->getStock()) {
+            $quantity = $product->getStock();
+        }
+
         // Add the product to the cart
         if (!isset($cart[$product->getId()])) {
-            $cart[$product->getId()] = 1;
+            $cart[$product->getId()] = $quantity;
         } else {
-            $cart[$product->getId()]++;
+            $cart[$product->getId()] += $quantity;
         }
 
         // Save the cart back to the session
@@ -105,7 +119,7 @@ class CartController extends AbstractController
     public function clearCart(SessionInterface $session): Response
     {
         $session->remove('cart');
-        $this->addFlash('success', 'Panier vidé avec succès!');
+        $this->addFlash('success', 'Votre panier a été vidé avec succès!');
         return $this->redirectToRoute('app_cart_index');
     }
 }

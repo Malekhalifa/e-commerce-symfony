@@ -6,7 +6,7 @@
     <div class="container mt-4">
         <h1>Commande #{{ order.id }}</h1>
 
-        <div class="card">
+        <div class="card mb-4">
             <div class="card-body">
                 <h5 class="card-title">Détails de la commande</h5>
                 <p class="card-text"><strong>Date :</strong> {{ order.date|date('d/m/Y H:i') }}</p>
@@ -20,28 +20,28 @@
                     {% endif %}
                 </p>
                 <p class="card-text"><strong>Client :</strong> {{ order.user.email }}</p>
-                
-                <h6 class="mt-4">Produits commandés :</h6>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Produit</th>
-                            <th>Prix</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for product in order.products %}
-                            <tr>
-                                <td>{{ product.name }}</td>
-                                <td>{{ product.price }} TND</td>
-                            </tr>
-                        {% endfor %}
-                        <tr class="table-primary">
-                            <td><strong>Total</strong></td>
-                            <td><strong>{{ order.products|reduce((carry, product) => carry + product.price, 0) }} TND</strong></td>
-                        </tr>
-                    </tbody>
-                </table>
+            </div>
+        </div>
+        
+        <h5 class="mb-3">Produits commandés :</h5>
+        <div class="row">
+            {% for product in order.products %}
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <img src="{{ product.image }}" class="card-img-top" alt="{{ product.name }}" style="height: 200px; object-fit: cover;">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ product.name }}</h5>
+                            <p class="card-text"><strong>Prix :</strong> {{ product.price }} TND</p>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-body">
+                <h5 class="card-title">Total de la commande</h5>
+                <p class="card-text"><strong>Montant total :</strong> {{ order.products|reduce((carry, product) => carry + product.price, 0) }} TND</p>
             </div>
         </div>
 
