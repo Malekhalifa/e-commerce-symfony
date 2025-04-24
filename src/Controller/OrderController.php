@@ -6,6 +6,7 @@ use App\Entity\Order;
 use App\Form\OrderType;
 use App\Repository\OrderRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -17,10 +18,20 @@ class OrderController extends AbstractController
 {
     #[Route('/', name: 'app_order_index', methods: ['GET'])]
     #[IsGranted('ROLE_ADMIN')]
-    public function index(OrderRepository $orderRepository): Response
+    public function index(Request $request, OrderRepository $orderRepository, PaginatorInterface $paginator): Response
     {
+        $query = $orderRepository->createQueryBuilder('o')
+            ->orderBy('o.date', 'DESC')
+            ->getQuery();
+
+        $orders = $paginator->paginate(
+            $query,
+            $request->query->getInt('page', 1),
+            10 // items per page
+        );
+
         return $this->render('order/index.html.twig', [
-            'orders' => $orderRepository->findAll(),
+            'orders' => $orders,
         ]);
     }
 

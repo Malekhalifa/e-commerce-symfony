@@ -23,11 +23,20 @@ class ProductController extends AbstractController
             ->orderBy('p.name', 'ASC')
             ->getQuery();
 
+        $page = $request->query->getInt('page', 1);
+        $limit = 12; // Number of items per page (multiple of 3 for grid layout)
+
         $products = $paginator->paginate(
             $query,
-            $request->query->getInt('page', 1),
-            10 // items per page
+            $page,
+            $limit
         );
+
+        // If we're on a page with no results, redirect to the last page
+        if ($products->count() === 0 && $page > 1) {
+            $lastPage = ceil($products->getTotalItemCount() / $limit);
+            return $this->redirectToRoute('app_product_index', ['page' => $lastPage]);
+        }
 
         return $this->render('product/index.html.twig', [
             'products' => $products,

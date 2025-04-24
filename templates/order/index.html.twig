@@ -41,11 +41,16 @@
                         {% endif %}
                     </td>
                     <td>
-                        <ul class="list-unstyled">
+                        <ul class="list-unstyled mb-2">
+                            {% set total = 0 %}
                             {% for product in order.products %}
                                 <li>{{ product.name }} - {{ product.price }} TND</li>
+                                {% set total = total + product.price %}
                             {% endfor %}
                         </ul>
+                        <div class="border-top pt-2">
+                            <strong class="text-dark">Total: {{ total|number_format(2, '.', ',') }} TND</strong>
+                        </div>
                     </td>
                     <td>
                         <a href="{{ path('app_order_show', {'id': order.id}) }}" class="btn btn-info btn-sm">Voir</a>
@@ -63,5 +68,9 @@
             {% endfor %}
             </tbody>
         </table>
+
+        <div class="d-flex justify-content-center mt-5">
+            {{ knp_pagination_render(orders) }}
+        </div>
     </div>
 {% endblock %} 

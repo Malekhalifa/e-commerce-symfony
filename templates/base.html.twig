@@ -11,6 +11,18 @@
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
         <!-- Custom CSS -->
         <link href="{{ asset('css/custom.css') }}" rel="stylesheet">
+        <style>
+            .toast-container {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 1050;
+            }
+            .custom-toast {
+                background-color: #fff;
+                border-left: 4px solid #28a745;
+            }
+        </style>
         {% block stylesheets %}{% endblock %}
     </head>
     <body>
@@ -90,6 +102,9 @@
             </div>
         </nav>
 
+        <!-- Toast Container -->
+        <div class="toast-container"></div>
+
         {% for message in app.flashes('success') %}
             <div class="alert alert-success">
                 {{ message }}
@@ -106,6 +121,81 @@
 
         <!-- Bootstrap JS -->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        
+        <!-- Custom JS -->
+        <script>
+            function showToast(message) {
+                const toastContainer = document.querySelector('.toast-container');
+                const toastHtml = `
+                    <div class="toast custom-toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="3000">
+                        <div class="toast-header">
+                            <i class="fas fa-shopping-cart text-success me-2"></i>
+                            <strong class="me-auto">Panier</strong>
+                            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                        </div>
+                        <div class="toast-body">
+                            ${message}
+                        </div>
+                    </div>
+                `;
+                toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+                
+                const toastElement = toastContainer.lastElementChild;
+                const bsToast = new bootstrap.Toast(toastElement);
+                bsToast.show();
+                
+                // Remove the toast element after it's hidden
+                toastElement.addEventListener('hidden.bs.toast', () => {
+                    toastElement.remove();
+                });
+            }
+
+            // Add to cart functionality
+            document.addEventListener('DOMContentLoaded', function() {
+                document.addEventListener('submit', function(e) {
+                    const form = e.target;
+                    if (form.matches('form[action*="cart/add"]')) {
+                        e.preventDefault();
+                        
+                        const formData = new FormData(form);
+                        const submitButton = form.querySelector('button[type="submit"]');
+                        
+                        // Disable button and show loading state
+                        if (submitButton) {
+                            submitButton.disabled = true;
+                            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                        }
+                        
+                        fetch(form.action, {
+                            method: 'POST',
+                            body: formData,
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                showToast(data.message);
+                            } else {
+                                showToast('Une erreur est survenue lors de l\'ajout au panier');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            showToast('Une erreur est survenue lors de l\'ajout au panier');
+                        })
+                        .finally(() => {
+                            // Re-enable button and restore original text
+                            if (submitButton) {
+                                submitButton.disabled = false;
+                                submitButton.innerHTML = '<i class="fas fa-cart-plus"></i> Ajouter au panier';
+                            }
+                        });
+                    }
+                });
+            });
+        </script>
         {% block javascripts %}{% endblock %}
     </body>
 </html> 

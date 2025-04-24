@@ -3,62 +3,93 @@
 {% block title %}{{ category.name }} - TechStore{% endblock %}
 
 {% block body %}
-    <div class="container">
-        <div class="category-banner">
-            <div class="row align-items-center">
+    <div class="container mt-5">
+        <!-- Category Header -->
+        <div class="category-header bg-primary text-white rounded-4 p-5 mb-5 position-relative overflow-hidden">
+            <div class="row align-items-center position-relative z-1">
                 <div class="col-md-8">
-                    <h1>{{ category.name }}</h1>
-                    <p class="lead">{{ category.description }}</p>
+                    <h1 class="display-4 fw-bold mb-3">{{ category.name }}</h1>
+                    <p class="lead fs-4 mb-0">{{ category.description }}</p>
                 </div>
                 <div class="col-md-4 text-end">
-                    <i class="fas fa-tags fa-4x text-light"></i>
+                    <i class="fas fa-tags fa-6x text-white-50"></i>
                 </div>
+            </div>
+            <div class="position-absolute top-0 end-0 mt-5 me-5 opacity-25">
+                <i class="fas fa-shapes fa-10x"></i>
             </div>
         </div>
 
-        <div class="row">
-            {% for product in category.products %}
-                <div class="col-md-4 mb-4">
-                    <div class="card h-100">
-                        <img src="{{ product.image }}" class="card-img-top" alt="{{ product.name }}" style="height: 200px; object-fit: cover;">
-                        <div class="card-body">
-                            <h5 class="card-title">{{ product.name }}</h5>
-                            <p class="card-text">{{ product.description|slice(0, 100) }}...</p>
-                            <p class="card-text"><strong>Prix :</strong> {{ product.price }} TND</p>
-                            {% if is_granted('ROLE_ADMIN') %}
-                                <p class="card-text"><strong>Stock :</strong> {{ product.stock }}</p>
-                            {% endif %}
-                            <div class="d-flex justify-content-between align-items-center">
-                                <a href="{{ path('app_product_show', {'id': product.id}) }}" class="btn btn-primary">
-                                    <i class="fas fa-eye"></i> Voir le produit
-                                </a>
-                                {% if app.user %}
-                                    <form method="post" action="{{ path('app_cart_add', {'id': product.id}) }}" class="d-inline">
-                                        <div class="input-group input-group-sm" style="width: 150px;">
-                                            <input type="number" name="quantity" class="form-control" value="1" min="1" max="{% if is_granted('ROLE_ADMIN') %}{{ product.stock }}{% else %}10{% endif %}">
-                                            <button type="submit" class="btn btn-success">
-                                                <i class="fas fa-cart-plus"></i>
-                                            </button>
-                                        </div>
-                                    </form>
+        <!-- Products Grid -->
+        <div class="row g-4">
+            {% for product in products %}
+                <div class="col-md-4">
+                    <div class="card h-100 product-card shadow-sm border-0 position-relative">
+                        <a href="{{ path('app_product_show', {'id': product.id}) }}" class="text-decoration-none text-dark">
+                            <div class="position-relative">
+                                <img src="{{ product.image }}" class="card-img-top" alt="{{ product.name }}" style="height: 250px; object-fit: cover;">
+                                {% if product.stock <= 5 and product.stock > 0 %}
+                                    <span class="position-absolute top-0 end-0 badge bg-warning m-2">Stock limité</span>
+                                {% elseif product.stock == 0 %}
+                                    <span class="position-absolute top-0 end-0 badge bg-danger m-2">Rupture de stock</span>
                                 {% endif %}
                             </div>
-                        </div>
+                            <div class="card-body">
+                                <h5 class="card-title fw-bold mb-3">{{ product.name }}</h5>
+                                <p class="card-text text-muted">{{ product.description|slice(0, 100) }}...</p>
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <span class="fs-5 fw-bold">{{ product.price }} TND</span>
+                                    <span class="badge bg-light text-dark">{{ category.name }}</span>
+                                </div>
+                            </div>
+                        </a>
+                        {% if app.user %}
+                            <div class="card-footer bg-white border-0 pt-0">
+                                <form method="post" action="{{ path('app_cart_add', {'id': product.id}) }}" class="d-flex gap-2 align-items-center">
+                                    <input type="number" name="quantity" class="form-control form-control-sm" value="1" min="1" max="{% if is_granted('ROLE_ADMIN') %}{{ product.stock }}{% else %}10{% endif %}" style="width: 70px;">
+                                    <button type="submit" class="btn btn-primary flex-grow-1">
+                                        <i class="fas fa-cart-plus"></i> Ajouter au panier
+                                    </button>
+                                </form>
+                            </div>
+                        {% endif %}
                     </div>
                 </div>
             {% else %}
                 <div class="col-12">
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle"></i> Aucun produit trouvé dans cette catégorie.
+                    <div class="alert alert-info text-center p-5">
+                        <i class="fas fa-box-open fa-3x mb-3"></i>
+                        <h4>Aucun produit disponible dans cette catégorie</h4>
+                        <p class="mb-0">Revenez plus tard pour découvrir nos nouveaux produits.</p>
                     </div>
                 </div>
             {% endfor %}
         </div>
 
-        <div class="mt-3">
-            <a href="{{ path('app_category_index') }}" class="btn btn-secondary">
-                <i class="fas fa-arrow-left"></i> Retour à la liste
+        <div class="d-flex justify-content-center mt-5">
+            {{ knp_pagination_render(products) }}
+        </div>
+
+        <div class="mt-4">
+            <a href="{{ path('app_category_index') }}" class="btn btn-outline-primary">
+                <i class="fas fa-arrow-left me-2"></i> Retour aux catégories
             </a>
         </div>
     </div>
+
+    <style>
+        .category-header {
+            background: linear-gradient(135deg, var(--bs-primary) 0%, #2c5cbe 100%);
+        }
+        .product-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+        }
+        .product-card .card-img-top {
+            border-radius: 0.375rem 0.375rem 0 0;
+        }
+    </style>
 {% endblock %} 

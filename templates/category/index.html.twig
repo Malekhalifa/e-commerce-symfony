@@ -1,43 +1,73 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Liste des catégories{% endblock %}
+{% block title %}Catégories - TechStore{% endblock %}
 
 {% block body %}
-    <div class="container mt-4">
-        <h1>Liste des catégories</h1>
+    <div class="container mt-5">
+        <!-- Header Section -->
+        <div class="category-header bg-primary text-white rounded-4 p-5 mb-5 position-relative overflow-hidden">
+            <div class="row align-items-center position-relative z-1">
+                <div class="col-md-8">
+                    <h1 class="display-4 fw-bold mb-3">Nos Catégories</h1>
+                    <p class="lead fs-4 mb-0">Découvrez notre sélection de produits par catégorie</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <i class="fas fa-tags fa-6x text-white-50"></i>
+                </div>
+            </div>
+            <div class="position-absolute top-0 end-0 mt-5 me-5 opacity-25">
+                <i class="fas fa-shapes fa-10x"></i>
+            </div>
+        </div>
 
         {% if is_granted('ROLE_ADMIN') %}
-            <a href="{{ path('app_category_new') }}" class="btn btn-primary mb-3">Créer une nouvelle catégorie</a>
+            <div class="mb-4">
+                <a href="{{ path('app_category_new') }}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Créer une nouvelle catégorie
+                </a>
+            </div>
         {% endif %}
 
         {% for message in app.flashes('success') %}
-            <div class="alert alert-success">
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
                 {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         {% endfor %}
 
-        <div class="row">
+        <div class="row g-4">
             {% for category in categories %}
-                <div class="col-md-4 mb-4">
-                    <div class="card h-100">
-                        <img src="{{ category.image }}" class="card-img-top" alt="{{ category.name }}" style="height: 200px; object-fit: cover;">
+                <div class="col-md-4">
+                    <div class="card h-100 category-card shadow-sm border-0">
+                        <div class="position-relative">
+                            <img src="{{ category.image }}" class="card-img-top" alt="{{ category.name }}" style="height: 250px; object-fit: cover;">
+                            <div class="category-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center">
+                                <div class="text-white text-center">
+                                    <i class="fas fa-arrow-right fa-2x opacity-0"></i>
+                                </div>
+                            </div>
+                        </div>
                         <div class="card-body">
-                            <h5 class="card-title">{{ category.name }}</h5>
-                            <p class="card-text">{{ category.description }}</p>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <a href="{{ path('app_category_show', {'id': category.id}) }}" class="btn btn-primary">Voir les produits</a>
+                            <h3 class="h4 fw-bold mb-3">{{ category.name }}</h3>
+                            <p class="card-text text-muted mb-4">{{ category.description }}</p>
+                            
+                            <div class="d-flex gap-2">
+                                <a href="{{ path('app_category_show', {'id': category.id}) }}" class="btn btn-primary flex-grow-1">
+                                    <i class="fas fa-eye me-2"></i>Voir les produits
+                                </a>
+                                
                                 {% if is_granted('ROLE_ADMIN') %}
-                                    <div class="btn-group">
-                                        <a href="{{ path('app_category_edit', {'id': category.id}) }}" class="btn btn-warning">
-                                            <i class="fas fa-edit"></i> Modifier
-                                        </a>
-                                        <form method="post" action="{{ path('app_category_delete', {'id': category.id}) }}" style="display: inline-block" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette catégorie ?');">
-                                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ category.id) }}">
-                                            <button class="btn btn-danger">
-                                                <i class="fas fa-trash"></i> Supprimer
-                                            </button>
-                                        </form>
-                                    </div>
+                                    <a href="{{ path('app_category_edit', {'id': category.id}) }}" class="btn btn-outline-warning">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form method="post" action="{{ path('app_category_delete', {'id': category.id}) }}" 
+                                          onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette catégorie ?');" 
+                                          style="display: inline-block">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ category.id) }}">
+                                        <button class="btn btn-outline-danger">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
                                 {% endif %}
                             </div>
                         </div>
@@ -45,11 +75,46 @@
                 </div>
             {% else %}
                 <div class="col-12">
-                    <div class="alert alert-info">
-                        Aucune catégorie trouvée
+                    <div class="alert alert-info text-center p-5">
+                        <i class="fas fa-folder-open fa-3x mb-3"></i>
+                        <h4>Aucune catégorie disponible</h4>
+                        <p class="mb-0">Aucune catégorie n'a été créée pour le moment.</p>
                     </div>
                 </div>
             {% endfor %}
         </div>
     </div>
+
+    <style>
+        .category-header {
+            background: linear-gradient(135deg, var(--bs-primary) 0%, #2c5cbe 100%);
+        }
+        .category-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .category-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+        }
+        .category-card:hover .category-overlay {
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+        .category-card:hover .category-overlay i {
+            opacity: 1 !important;
+        }
+        .category-overlay {
+            background-color: rgba(0, 0, 0, 0);
+            transition: background-color 0.3s ease;
+            border-radius: 0.375rem 0.375rem 0 0;
+        }
+        .category-overlay i {
+            transition: opacity 0.3s ease;
+        }
+        .category-card .card-img-top {
+            border-radius: 0.375rem 0.375rem 0 0;
+        }
+        .btn-outline-warning:hover, .btn-outline-danger:hover {
+            color: white;
+        }
+    </style>
 {% endblock %} 

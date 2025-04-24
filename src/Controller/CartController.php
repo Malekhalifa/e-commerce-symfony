@@ -9,6 +9,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
@@ -45,35 +46,56 @@ class CartController extends AbstractController
     #[IsGranted('ROLE_USER')]
     public function addToCart(Product $product, Request $request, SessionInterface $session): Response
     {
-        // Get the cart from the session
-        $cart = $session->get('cart', []);
+        try {
+            // Get the cart from the session
+            $cart = $session->get('cart', []);
 
-        // Get quantity from request
-        $quantity = (int) $request->request->get('quantity', 1);
+            // Get quantity from request
+            $quantity = (int) $request->request->get('quantity', 1);
 
-        // Validate quantity
-        if ($quantity < 1) {
-            $quantity = 1;
+            // Validate quantity
+            if ($quantity < 1) {
+                $quantity = 1;
+            }
+
+            // Check stock if user is admin
+            if ($this->isGranted('ROLE_ADMIN') && $quantity > $product->getStock()) {
+                $quantity = $product->getStock();
+            }
+
+            // Add the product to the cart
+            if (!isset($cart[$product->getId()])) {
+                $cart[$product->getId()] = $quantity;
+            } else {
+                $cart[$product->getId()] += $quantity;
+            }
+
+            // Save the cart back to the session
+            $session->set('cart', $cart);
+
+            // Check if it's an AJAX request
+            if ($request->headers->get('X-Requested-With') === 'XMLHttpRequest') {
+                return new JsonResponse([
+                    'success' => true,
+                    'message' => sprintf('"%s" a été ajouté à votre panier', $product->getName())
+                ]);
+            }
+
+            // Regular form submission
+            $this->addFlash('success', 'Produit ajouté au panier avec succès!');
+            return $this->redirectToRoute('app_cart_index');
+
+        } catch (\Exception $e) {
+            if ($request->headers->get('X-Requested-With') === 'XMLHttpRequest') {
+                return new JsonResponse([
+                    'success' => false,
+                    'message' => 'Une erreur est survenue lors de l\'ajout au panier'
+                ]);
+            }
+
+            $this->addFlash('error', 'Une erreur est survenue lors de l\'ajout au panier');
+            return $this->redirectToRoute('app_cart_index');
         }
-
-        // Check stock if user is admin
-        if ($this->isGranted('ROLE_ADMIN') && $quantity > $product->getStock()) {
-            $quantity = $product->getStock();
-        }
-
-        // Add the product to the cart
-        if (!isset($cart[$product->getId()])) {
-            $cart[$product->getId()] = $quantity;
-        } else {
-            $cart[$product->getId()] += $quantity;
-        }
-
-        // Save the cart back to the session
-        $session->set('cart', $cart);
-
-        $this->addFlash('success', 'Produit ajouté au panier avec succès!');
-
-        return $this->redirectToRoute('app_cart_index');
     }
 
     #[Route('/validate', name: 'app_cart_validate', methods: ['GET'])]

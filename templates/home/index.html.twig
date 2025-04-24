@@ -3,72 +3,137 @@
 {% block title %}TechStore - Votre boutique tech{% endblock %}
 
 {% block body %}
-<div class="container">
-    <div class="jumbotron">
+<div class="container mt-5">
+    <!-- Hero Section -->
+    <div class="hero-section bg-primary text-white rounded-4 p-5 mb-5 position-relative overflow-hidden">
         <div class="row align-items-center">
-            <div class="col-md-8">
-                <h1 class="display-4">Bienvenue sur TechStore</h1>
-                <p class="lead">Découvrez notre sélection de produits tech de qualité.</p>
-                <a href="{{ path('app_product_index') }}" class="btn btn-light btn-lg">
-                    <i class="fas fa-shopping-bag"></i> Découvrir nos produits
+            <div class="col-md-8 position-relative z-1">
+                <h1 class="display-3 fw-bold mb-3">Bienvenue sur TechStore</h1>
+                <p class="lead fs-4 mb-4">Découvrez notre sélection de produits tech de qualité.</p>
+                <a href="{{ path('app_product_index') }}" class="btn btn-light btn-lg px-4 py-2">
+                    <i class="fas fa-shopping-bag me-2"></i> Découvrir nos produits
                 </a>
             </div>
-            <div class="col-md-4">
-                <i class="fas fa-laptop-code fa-5x text-light"></i>
+            <div class="col-md-4 text-center position-relative z-1">
+                <i class="fas fa-laptop-code fa-8x text-white-50"></i>
             </div>
+        </div>
+        <div class="position-absolute top-0 end-0 mt-5 me-5 opacity-25">
+            <i class="fas fa-circuit-board fa-10x"></i>
         </div>
     </div>
 
-    <h2 class="mt-5 mb-4">Nos catégories</h2>
-    <div class="row">
-        {% for category in categories %}
-            <div class="col-md-4 mb-4">
-                <div class="card h-100">
-                    <img src="{{ category.image }}" class="card-img-top" alt="{{ category.name }}" style="height: 200px; object-fit: cover;">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ category.name }}</h5>
-                        <p class="card-text">{{ category.description }}</p>
-                        <a href="{{ path('app_category_show', {'id': category.id}) }}" class="btn btn-primary">
-                            <i class="fas fa-arrow-right"></i> Voir les produits
-                        </a>
-                    </div>
-                </div>
-            </div>
-        {% endfor %}
-    </div>
-
-    <h2 class="mt-5 mb-4">Produits en vedette</h2>
-    <div class="row">
-        {% for product in products %}
-            <div class="col-md-4 mb-4">
-                <div class="card h-100">
-                    <img src="{{ product.image }}" class="card-img-top" alt="{{ product.name }}" style="height: 200px; object-fit: cover;">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ product.name }}</h5>
-                        <p class="card-text">{{ product.description|slice(0, 100) }}...</p>
-                        <p class="card-text"><strong>Prix :</strong> {{ product.price }} TND</p>
-                        {% if is_granted('ROLE_ADMIN') %}
-                            <p class="card-text"><strong>Stock :</strong> {{ product.stock }}</p>
-                        {% endif %}
-                        <div class="d-flex justify-content-between align-items-center">
-                            <a href="{{ path('app_product_show', {'id': product.id}) }}" class="btn btn-primary">
-                                <i class="fas fa-eye"></i> Voir le produit
-                            </a>
-                            {% if app.user %}
-                                <form method="post" action="{{ path('app_cart_add', {'id': product.id}) }}" class="d-inline">
-                                    <div class="input-group input-group-sm" style="width: 150px;">
-                                        <input type="number" name="quantity" class="form-control" value="1" min="1" max="{% if is_granted('ROLE_ADMIN') %}{{ product.stock }}{% else %}10{% endif %}">
-                                        <button type="submit" class="btn btn-success">
-                                            <i class="fas fa-cart-plus"></i>
-                                        </button>
+    <!-- Categories Section -->
+    <section class="mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="display-6 fw-bold">Nos catégories</h2>
+        </div>
+        <div class="row g-4">
+            {% for category in categories %}
+                <div class="col-md-4">
+                    <a href="{{ path('app_category_show', {'id': category.id}) }}" class="text-decoration-none">
+                        <div class="card h-100 category-card shadow-sm border-0">
+                            <div class="position-relative">
+                                <img src="{{ category.image }}" class="card-img-top" alt="{{ category.name }}" style="height: 250px; object-fit: cover;">
+                                <div class="category-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center">
+                                    <div class="text-white text-center">
+                                        <i class="fas fa-arrow-right fa-2x opacity-0"></i>
                                     </div>
-                                </form>
-                            {% endif %}
+                                </div>
+                            </div>
+                            <div class="card-body text-center">
+                                <h3 class="h4 fw-bold mb-2">{{ category.name }}</h3>
+                                <p class="card-text text-muted">{{ category.description }}</p>
+                            </div>
                         </div>
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Featured Products Section -->
+    <section>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="display-6 fw-bold">Produits en vedette</h2>
+        </div>
+        <div class="row g-4">
+            {% for product in products %}
+                <div class="col-md-4">
+                    <div class="card h-100 product-card shadow-sm border-0 position-relative">
+                        <a href="{{ path('app_product_show', {'id': product.id}) }}" class="text-decoration-none text-dark">
+                            <div class="position-relative">
+                                <img src="{{ product.image }}" class="card-img-top" alt="{{ product.name }}" style="height: 250px; object-fit: cover;">
+                                {% if product.stock <= 5 and product.stock > 0 %}
+                                    <span class="position-absolute top-0 end-0 badge bg-warning m-2">Stock limité</span>
+                                {% elseif product.stock == 0 %}
+                                    <span class="position-absolute top-0 end-0 badge bg-danger m-2">Rupture de stock</span>
+                                {% endif %}
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title fw-bold mb-3">{{ product.name }}</h5>
+                                <p class="card-text text-muted">{{ product.description|slice(0, 100) }}...</p>
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <span class="fs-5 fw-bold">{{ product.price }} TND</span>
+                                    <span class="badge bg-light text-dark">{{ product.category.name }}</span>
+                                </div>
+                            </div>
+                        </a>
+                        {% if app.user %}
+                            <div class="card-footer bg-white border-0 pt-0">
+                                <form method="post" action="{{ path('app_cart_add', {'id': product.id}) }}" class="d-flex gap-2 align-items-center">
+                                    <input type="number" name="quantity" class="form-control form-control-sm" value="1" min="1" max="{% if is_granted('ROLE_ADMIN') %}{{ product.stock }}{% else %}10{% endif %}" style="width: 70px;">
+                                    <button type="submit" class="btn btn-primary flex-grow-1">
+                                        <i class="fas fa-cart-plus"></i> Ajouter au panier
+                                    </button>
+                                </form>
+                            </div>
+                        {% endif %}
                     </div>
                 </div>
-            </div>
-        {% endfor %}
-    </div>
+            {% else %}
+                <div class="col-12">
+                    <div class="alert alert-info text-center p-5">
+                        <i class="fas fa-box-open fa-3x mb-3"></i>
+                        <h4>Aucun produit disponible pour le moment</h4>
+                        <p class="mb-0">Revenez plus tard pour découvrir nos nouveaux produits.</p>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="d-flex justify-content-center mt-5">
+            {{ knp_pagination_render(products) }}
+        </div>
+    </section>
 </div>
+
+<style>
+    .hero-section {
+        background: linear-gradient(135deg, var(--bs-primary) 0%, #2c5cbe 100%);
+    }
+    .product-card, .category-card {
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    }
+    .product-card:hover, .category-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+    }
+    .category-card:hover .category-overlay {
+        background-color: rgba(0, 0, 0, 0.2);
+    }
+    .category-card:hover .category-overlay i {
+        opacity: 1 !important;
+    }
+    .category-overlay {
+        background-color: rgba(0, 0, 0, 0);
+        transition: background-color 0.3s ease;
+    }
+    .category-overlay i {
+        transition: opacity 0.3s ease;
+    }
+    .product-card .card-img-top, .category-card .card-img-top {
+        border-radius: 0.375rem 0.375rem 0 0;
+    }
+</style>
 {% endblock %} 

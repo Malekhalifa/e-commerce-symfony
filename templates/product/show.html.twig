@@ -24,7 +24,7 @@
                         {% if app.user %}
                             <form method="post" action="{{ path('app_cart_add', {'id': product.id}) }}" class="d-inline">
                                 <div class="input-group" style="width: 200px;">
-                                    <input type="number" name="quantity" class="form-control" value="1" min="1" max="{% if is_granted('ROLE_ADMIN') %}{{ product.stock }}{% else %}10{% endif %}">
+                                    <input type="number" name="quantity" class="form-control me-3" value="1" min="1" max="{% if is_granted('ROLE_ADMIN') %}{{ product.stock }}{% else %}10{% endif %}">
                                     <button type="submit" class="btn btn-primary">
                                         <i class="fas fa-cart-plus"></i> Ajouter au panier
                                     </button>
@@ -37,19 +37,25 @@
                         {% endif %}
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <div class="mt-3">
-            <a href="{{ path('app_product_index') }}" class="btn btn-secondary">Retour à la liste</a>
-            
-            {% if is_granted('ROLE_ADMIN') %}
-                <a href="{{ path('app_product_edit', {'id': product.id}) }}" class="btn btn-warning">Modifier</a>
-                <form method="post" action="{{ path('app_product_delete', {'id': product.id}) }}" style="display: inline-block" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce produit ?');">
-                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ product.id) }}">
-                    <button class="btn btn-danger">Supprimer</button>
-                </form>
-            {% endif %}
+                <div class="mt-3 d-flex gap-2">
+                    {% if is_granted('ROLE_ADMIN') %}
+                        <a href="{{ path('app_product_edit', {'id': product.id}) }}" class="btn btn-warning">
+                            <i class="fas fa-edit"></i> Modifier
+                        </a>
+                        <form method="post" action="{{ path('app_product_delete', {'id': product.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce produit ?');">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ product.id) }}">
+                            <button class="btn btn-danger">
+                                <i class="fas fa-trash"></i> Supprimer
+                            </button>
+                        </form>
+                    {% endif %}
+                    
+                    <a href="{{ path('app_product_index') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Retour à la liste
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 {% endblock %} 

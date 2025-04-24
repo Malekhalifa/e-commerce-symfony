@@ -3,13 +3,86 @@
 {% block title %}Modifier le produit{% endblock %}
 
 {% block body %}
-    <div class="container mt-4">
-        <h1>Modifier le produit</h1>
+    <div class="container mt-5">
+        <!-- Header Section -->
+        <div class="bg-primary text-white rounded-4 p-5 mb-5 position-relative overflow-hidden">
+            <div class="row align-items-center position-relative z-1">
+                <div class="col-md-8">
+                    <h1 class="display-4 fw-bold mb-3">Modifier le produit</h1>
+                    <p class="lead mb-0 opacity-75">Modifiez les informations du produit ci-dessous</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <i class="fas fa-edit fa-6x text-white-50"></i>
+                </div>
+            </div>
+            <div class="position-absolute top-0 end-0 mt-5 me-5 opacity-25">
+                <i class="fas fa-shapes fa-10x"></i>
+            </div>
+        </div>
 
-        {{ form_start(form) }}
-            {{ form_widget(form) }}
-            <button class="btn btn-primary">Enregistrer</button>
-            <a href="{{ path('app_product_index') }}" class="btn btn-secondary">Retour à la liste</a>
+        <!-- Form Section -->
+        {{ form_start(form, {'attr': {'class': 'card shadow-sm border-0'}}) }}
+        <div class="card-body p-4">
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        {{ form_label(form.name, 'Nom', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                        {{ form_widget(form.name, {'attr': {'class': 'form-control', 'placeholder': 'Nom du produit'}}) }}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        {{ form_label(form.category, 'Catégorie', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                        {{ form_widget(form.category, {'attr': {'class': 'form-select'}}) }}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        {{ form_label(form.price, 'Prix', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                        {{ form_widget(form.price, {'attr': {'class': 'form-control', 'placeholder': 'Prix en TND'}}) }}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        {{ form_label(form.stock, 'Stock', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                        {{ form_widget(form.stock, {'attr': {'class': 'form-control', 'placeholder': 'Quantité en stock'}}) }}
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="form-group">
+                        {{ form_label(form.description, 'Description', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                        {{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows': '4', 'placeholder': 'Description détaillée du produit'}}) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-footer bg-white p-4 d-flex gap-2 justify-content-end">
+            <a href="{{ path('app_product_index') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Retour à la liste
+            </a>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save me-2"></i>Enregistrer
+            </button>
+        </div>
         {{ form_end(form) }}
     </div>
+
+    <style>
+        .bg-primary {
+            background: linear-gradient(135deg, var(--bs-primary) 0%, #2c5cbe 100%);
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: var(--bs-primary);
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+        }
+        .form-control, .form-select {
+            border: 1px solid #dee2e6;
+            padding: 0.75rem 1rem;
+        }
+        .form-label {
+            margin-bottom: 0.5rem;
+            color: #344767;
+        }
+    </style>
 {% endblock %} 

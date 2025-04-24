@@ -1,0 +1,103 @@
+{% if pageCount > 1 %}
+    <nav aria-label="Pagination">
+        <ul class="pagination justify-content-center">
+            {# First page #}
+            {% if first is defined and current != first %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ path(route, query|merge({(pageParameterName): first})) }}" aria-label="First">
+                        <i class="fas fa-angle-double-left"></i>
+                    </a>
+                </li>
+            {% endif %}
+
+            {# Previous page #}
+            {% if previous is defined %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ path(route, query|merge({(pageParameterName): previous})) }}" aria-label="Previous">
+                        <i class="fas fa-angle-left"></i>
+                    </a>
+                </li>
+            {% endif %}
+
+            {# Numbered pages #}
+            {% set pagesInRange = [] %}
+            
+            {% if current > 1 %}
+                {% set pagesInRange = pagesInRange|merge([1]) %}
+            {% endif %}
+            
+            {% for page in range(max(current - 1, 1), min(current + 1, pageCount)) %}
+                {% set pagesInRange = pagesInRange|merge([page]) %}
+            {% endfor %}
+            
+            {% if current < pageCount %}
+                {% set pagesInRange = pagesInRange|merge([pageCount]) %}
+            {% endif %}
+            
+            {% set previousPage = null %}
+            {% for page in pagesInRange %}
+                {% if previousPage is not null and page > previousPage + 1 %}
+                    <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                    </li>
+                {% endif %}
+                
+                <li class="page-item {% if page == current %}active{% endif %}">
+                    <a class="page-link" href="{{ path(route, query|merge({(pageParameterName): page})) }}">{{ page }}</a>
+                </li>
+                
+                {% set previousPage = page %}
+            {% endfor %}
+
+            {# Next page #}
+            {% if next is defined and current != pageCount %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ path(route, query|merge({(pageParameterName): next})) }}" aria-label="Next">
+                        <i class="fas fa-angle-right"></i>
+                    </a>
+                </li>
+            {% endif %}
+
+            {# Last page #}
+            {% if last is defined and current != last %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ path(route, query|merge({(pageParameterName): last})) }}" aria-label="Last">
+                        <i class="fas fa-angle-double-right"></i>
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+
+    <style>
+        .pagination {
+            gap: 5px;
+        }
+        .page-link {
+            border: none;
+            padding: 0.5rem 0.75rem;
+            color: #6c757d;
+            background-color: #fff;
+            border-radius: 0.375rem;
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 2px 4px rgba(0,0,0,.05);
+        }
+        .page-link:hover {
+            color: #0d6efd;
+            background-color: #f8f9fa;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(0,0,0,.08);
+        }
+        .page-item.active .page-link {
+            background-color: #0d6efd;
+            color: white;
+            box-shadow: 0 4px 6px rgba(13, 110, 253, 0.2);
+        }
+        .page-item.active .page-link:hover {
+            transform: none;
+        }
+        .page-link:focus {
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        }
+    </style>
+{% endif %} 

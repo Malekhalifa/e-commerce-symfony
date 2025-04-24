@@ -3,13 +3,142 @@
 {% block title %}Modifier la commande{% endblock %}
 
 {% block body %}
-    <div class="container mt-4">
-        <h1>Modifier la commande</h1>
+    <div class="container-fluid mt-5">
+        <!-- Header Section -->
+        <div class="order-header bg-primary text-white rounded-4 p-5 mb-5 position-relative overflow-hidden">
+            <div class="row align-items-center position-relative z-1">
+                <div class="col-md-8">
+                    <h1 class="display-4 fw-bold mb-3">Modifier la commande</h1>
+                    <p class="lead fs-4 mb-0">Commande #{{ order.id }}</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <i class="fas fa-edit fa-6x text-white-50"></i>
+                </div>
+            </div>
+            <div class="position-absolute top-0 end-0 mt-5 me-5 opacity-25">
+                <i class="fas fa-shapes fa-10x"></i>
+            </div>
+        </div>
 
-        {{ form_start(form) }}
-            {{ form_widget(form) }}
-            <button class="btn btn-primary">Enregistrer</button>
-            <a href="{{ path('app_order_index') }}" class="btn btn-secondary">Retour à la liste</a>
+        {{ form_start(form, {'attr': {'class': 'card shadow-sm border-0'}}) }}
+        <div class="card-body p-4">
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        {{ form_label(form.user, 'Client', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                        {{ form_widget(form.user, {'attr': {'class': 'form-select'}}) }}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        {{ form_label(form.status, 'Statut', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                        {{ form_widget(form.status, {'attr': {'class': 'form-select'}}) }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group mb-4">
+                {{ form_label(form.date, 'Date de commande', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                {{ form_widget(form.date, {'attr': {'class': 'form-control'}}) }}
+            </div>
+
+            <div class="products-section">
+                <h3 class="h4 mb-4">Produits de la commande</h3>
+                <div class="row g-3" id="products-grid">
+                    {% for product in form.products %}
+                        <div class="col-2 product-item">
+                            <div class="card h-100 product-card shadow-sm border-0 {% if product.vars.checked %}selected{% endif %}">
+                                <div class="position-relative">
+                                    <div class="product-image-wrapper">
+                                        <img src="https://picsum.photos/200/120?random={{ loop.index }}" 
+                                             class="w-100 h-100 object-fit-cover" 
+                                             alt="Product image"
+                                             style="height: 120px;">
+                                    </div>
+                                    <div class="product-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center">
+                                        <div class="text-white text-center">
+                                            <i class="fas fa-check-circle"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-body p-2">
+                                    <h6 class="card-title fw-bold mb-0 small">{{ product.vars.label }}</h6>
+                                    <div class="d-none">
+                                        {{ form_widget(product) }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="card-footer bg-white p-4 d-flex gap-2 justify-content-end">
+            <a href="{{ path('app_order_index') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Retour à la liste
+            </a>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save me-2"></i>Enregistrer
+            </button>
+        </div>
         {{ form_end(form) }}
     </div>
+
+    <style>
+        .order-header {
+            background: linear-gradient(135deg, var(--bs-primary) 0%, #2c5cbe 100%);
+        }
+        .product-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .product-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 .25rem .5rem rgba(0,0,0,.15)!important;
+        }
+        .product-card.selected {
+            border: 2px solid var(--bs-primary) !important;
+            box-shadow: 0 .25rem .5rem rgba(13, 110, 253, 0.15)!important;
+        }
+        .product-card.selected .product-overlay {
+            background-color: rgba(13, 110, 253, 0.3);
+        }
+        .product-card.selected .product-overlay i {
+            opacity: 1;
+        }
+        .product-overlay {
+            background-color: rgba(0, 0, 0, 0);
+            transition: background-color 0.3s ease;
+            border-radius: 0.375rem 0.375rem 0 0;
+        }
+        .product-overlay i {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .product-image-wrapper {
+            border-radius: 0.375rem 0.375rem 0 0;
+            overflow: hidden;
+        }
+        .product-card:hover img {
+            transform: scale(1.05);
+        }
+        .product-image-wrapper img {
+            transition: transform 0.3s ease;
+        }
+    </style>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const productCards = document.querySelectorAll('.product-card');
+        
+        productCards.forEach(card => {
+            card.addEventListener('click', function() {
+                const checkbox = this.querySelector('input[type="checkbox"]');
+                checkbox.checked = !checkbox.checked;
+                this.classList.toggle('selected');
+            });
+        });
+    });
+    </script>
 {% endblock %} 

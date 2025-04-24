@@ -5,11 +5,14 @@ namespace App\Controller;
 use App\Entity\Category;
 use App\Form\CategoryType;
 use App\Repository\CategoryRepository;
+use App\Repository\ProductRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/category')]
 class CategoryController extends AbstractController
@@ -44,10 +47,23 @@ class CategoryController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_category_show', methods: ['GET'])]
-    public function show(Category $category): Response
+    public function show(Request $request, Category $category, ProductRepository $productRepository, PaginatorInterface $paginator): Response
     {
+        $query = $productRepository->createQueryBuilder('p')
+            ->where('p.category = :category')
+            ->setParameter('category', $category)
+            ->orderBy('p.name', 'ASC')
+            ->getQuery();
+
+        $products = $paginator->paginate(
+            $query,
+            $request->query->getInt('page', 1),
+            12 // items per page
+        );
+
         return $this->render('category/show.html.twig', [
             'category' => $category,
+            'products' => $products,
         ]);
     }
 

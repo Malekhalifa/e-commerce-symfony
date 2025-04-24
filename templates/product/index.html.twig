@@ -1,75 +1,98 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Liste des produits{% endblock %}
+{% block title %}Nos Produits{% endblock %}
 
 {% block body %}
-    <div class="container mt-4">
-        <h1>Liste des produits</h1>
-
-        {% if is_granted('ROLE_ADMIN') %}
-            <a href="{{ path('app_product_new') }}" class="btn btn-primary mb-3">Créer un nouveau produit</a>
-        {% endif %}
+    <div class="container mt-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="display-4 fw-bold">Nos Produits</h1>
+            {% if is_granted('ROLE_ADMIN') %}
+                <a href="{{ path('app_product_new') }}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Nouveau produit
+                </a>
+            {% endif %}
+        </div>
 
         {% for message in app.flashes('success') %}
-            <div class="alert alert-success">
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
                 {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         {% endfor %}
 
-        <div class="row">
+        <div class="row g-4">
             {% for product in products %}
-                <div class="col-md-4 mb-4">
-                    <div class="card h-100">
-                        <img src="{{ product.image }}" class="card-img-top" alt="{{ product.name }}" style="height: 200px; object-fit: cover;">
-                        <div class="card-body">
-                            <h5 class="card-title">{{ product.name }}</h5>
-                            <p class="card-text">{{ product.description|slice(0, 100) }}...</p>
-                            <p class="card-text"><strong>Prix :</strong> {{ product.price }} TND</p>
-                            {% if is_granted('ROLE_ADMIN') %}
-                                <p class="card-text"><strong>Stock :</strong> {{ product.stock }}</p>
-                            {% endif %}
-                            <p class="card-text"><strong>Catégorie :</strong> {{ product.category.name }}</p>
-                            
-                            <div class="btn-group" role="group">
-                                <a href="{{ path('app_product_show', {'id': product.id}) }}" class="btn btn-info btn-sm">
-                                    <i class="fas fa-eye"></i> Voir
-                                </a>
-                                {% if app.user %}
-                                    <form method="post" action="{{ path('app_cart_add', {'id': product.id}) }}" class="d-inline">
-                                        <div class="input-group input-group-sm" style="width: 150px;">
-                                            <input type="number" name="quantity" class="form-control" value="1" min="1" max="{% if is_granted('ROLE_ADMIN') %}{{ product.stock }}{% else %}10{% endif %}">
-                                            <button type="submit" class="btn btn-primary">
-                                                <i class="fas fa-cart-plus"></i> Ajouter
-                                            </button>
-                                        </div>
-                                    </form>
-                                {% endif %}
-                                {% if is_granted('ROLE_ADMIN') %}
-                                    <a href="{{ path('app_product_edit', {'id': product.id}) }}" class="btn btn-warning btn-sm">
-                                        <i class="fas fa-edit"></i> Modifier
-                                    </a>
-                                    <form method="post" action="{{ path('app_product_delete', {'id': product.id}) }}" style="display: inline-block" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce produit ?');">
-                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ product.id) }}">
-                                        <button class="btn btn-danger btn-sm">
-                                            <i class="fas fa-trash"></i> Supprimer
-                                        </button>
-                                    </form>
+                <div class="col-md-4">
+                    <div class="card h-100 product-card shadow-sm border-0 position-relative">
+                        <a href="{{ path('app_product_show', {'id': product.id}) }}" class="text-decoration-none text-dark">
+                            <div class="position-relative">
+                                <img src="{{ product.image }}" class="card-img-top" alt="{{ product.name }}" style="height: 250px; object-fit: cover;">
+                                {% if product.stock <= 5 and product.stock > 0 %}
+                                    <span class="position-absolute top-0 end-0 badge bg-warning m-2">Stock limité</span>
+                                {% elseif product.stock == 0 %}
+                                    <span class="position-absolute top-0 end-0 badge bg-danger m-2">Rupture de stock</span>
                                 {% endif %}
                             </div>
-                        </div>
+                            <div class="card-body">
+                                <h5 class="card-title fw-bold mb-3">{{ product.name }}</h5>
+                                <p class="card-text text-muted">{{ product.description|slice(0, 100) }}...</p>
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <span class="fs-5 fw-bold">{{ product.price }} TND</span>
+                                    <span class="badge bg-light text-dark">{{ product.category.name }}</span>
+                                </div>
+                            </div>
+                        </a>
+                        {% if app.user %}
+                            <div class="card-footer bg-white border-0 pt-0">
+                                <form method="post" action="{{ path('app_cart_add', {'id': product.id}) }}" class="d-flex gap-3 align-items-center">
+                                    <input type="number" name="quantity" class="form-control form-control-sm" value="1" min="1" max="{% if is_granted('ROLE_ADMIN') %}{{ product.stock }}{% else %}10{% endif %}" style="width: 70px;">
+                                    <button type="submit" class="btn btn-primary flex-grow-1">
+                                        <i class="fas fa-cart-plus"></i> Ajouter au panier
+                                    </button>
+                                </form>
+                                {% if is_granted('ROLE_ADMIN') %}
+                                    <div class="admin-controls mt-2 d-flex gap-2">
+                                        <a href="{{ path('app_product_edit', {'id': product.id}) }}" class="btn btn-outline-warning btn-sm flex-grow-1">
+                                            <i class="fas fa-edit"></i> Modifier
+                                        </a>
+                                        <form method="post" action="{{ path('app_product_delete', {'id': product.id}) }}" class="flex-grow-1" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce produit ?');">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ product.id) }}">
+                                            <button class="btn btn-outline-danger btn-sm w-100">
+                                                <i class="fas fa-trash"></i> Supprimer
+                                            </button>
+                                        </form>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endif %}
                     </div>
                 </div>
             {% else %}
                 <div class="col-12">
-                    <div class="alert alert-info">
-                        Aucun produit trouvé
+                    <div class="alert alert-info text-center p-5">
+                        <i class="fas fa-box-open fa-3x mb-3"></i>
+                        <h4>Aucun produit disponible pour le moment</h4>
+                        <p class="mb-0">Revenez plus tard pour découvrir nos nouveaux produits.</p>
                     </div>
                 </div>
             {% endfor %}
         </div>
 
-        <div class="d-flex justify-content-center mt-4">
+        <div class="d-flex justify-content-center mt-5">
             {{ knp_pagination_render(products) }}
         </div>
     </div>
+
+    <style>
+        .product-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+        }
+        .product-card .card-img-top {
+            border-radius: 0.375rem 0.375rem 0 0;
+        }
+    </style>
 {% endblock %} 
